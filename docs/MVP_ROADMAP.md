@@ -12,10 +12,26 @@
 ✅ User profiles with photos
 ✅ Preference form (location, budget, habits, lifestyle)
 ✅ Smart matching algorithm (compatibility score 0-100)
-✅ Swipe interface (right/left/super)
+✅ **Roommate Discovery** (Shortlist / Pass / Connect / Request Chat)
 ✅ Real-time chat between matches
 ✅ Basic search & filters
 ✅ Report & block functionality
+
+### The Discovery Mechanic: "Can I Live With This Person?"
+
+**Not dating-style swipes** — this is about practical roommate compatibility:
+
+| Action | What It Means | When to Use |
+|--------|---------------|-------------|
+| **💚 Connect** | "I'm interested, let's chat" | When you see potential compatibility |
+| **📝 Shortlist** | "Save for later consideration" | Good profile, but not ready to decide yet |
+| **➡️ Pass** | "Not a match for me" | Deal-breakers or clear incompatibility |
+| **⭐ Super Match** | "Highly interested!" | Strong compatibility across all key factors |
+
+**Match Flow:**
+1. User A **Connects** with User B → User B gets notified
+2. If User B also **Connects** → **It's a Match!** 💚 (Chat unlocked)
+3. Either can **Request Chat** even before mutual match (one-time reach-out)
 
 ### What's NOT in MVP
 ❌ Mobile apps (web-responsive only)
@@ -23,6 +39,54 @@
 ❌ Video calls
 ❌ Payment/premium features
 ❌ Room listing integration
+
+---
+
+## 🎯 Design Philosophy: "Can I Live With This Person?"
+
+**This is NOT a dating app.** It's a practical tool for finding compatible roommates.
+
+### Profile Design Principles
+
+Every profile element should help answer: **"Can I comfortably share a living space with this person?"**
+
+#### What Matters for Roommate Compatibility
+
+| Category | Why It Matters | How We Present It |
+|----------|---------------|-------------------|
+| **Sleep Schedule** | Different schedules can cause conflicts | "Early bird / Night owl / Flexible" with notes |
+| **Cleanliness Level** | #1 source of roommate conflict | 1-5 scale with expected behaviors |
+| **Budget** | Must align for shared expenses | Range with "what this gets you" context |
+| **Habits** | Smoking/drinking affects shared space | Clear preferences with "no preference" option |
+| **Guest Policy** | Frequent guests = privacy concerns | Frequency expectations stated clearly |
+| **Work Pattern** | WFH vs office affects home use | Schedule transparency |
+
+#### What Doesn't Matter (Minimized)
+
+- Physical appearance (no swipe on photos alone)
+- "Vibes" or gut feelings (data-driven matching)
+- Romantic compatibility (not relevant!)
+- Social status or career prestige
+- Hobbies and interests (nice to have, not critical)
+
+#### Discovery Action Design
+
+Each action on the discovery screen should be meaningful:
+
+| Action | User Intent | Result |
+|--------|-------------|--------|
+| **Connect** | "I could live with this person" | Signals interest, unlocks chat if mutual |
+| **Shortlist** | "Maybe, need to think more" | Saves for later, no notification sent |
+| **Pass** | "This won't work" | Removes from discovery, respects their time |
+| **Super Match** | "Highly compatible!" | Strong signal, shows in对方的 matches first |
+
+#### Match Communication Style
+
+- **First message template**: "Hi! I saw we're both looking for a place in Koramangala. Our schedules seem compatible too. Would you like to discuss potential room sharing?"
+- **Conversation focus**: Practicalities (move-in date, room preferences, deal-breakers)
+- **No small talk pressure**: Get to the point about living arrangements
+
+---
 
 ---
 
@@ -268,56 +332,102 @@ class Preference(Base):
 # Tasks:
 [ ] Create profile edit page
 [ ] Add photo upload (input type="file")
-[ ] Multi-step preference form:
+[ ] Multi-step preference form (focused on "Can I live with this person?"):
   [ ] Step 1: Location & Budget
   [ ] Step 2: Room Requirements
-  [ ] Step 3: Lifestyle Habits
-  [ ] Step 4: Schedule & Social
-  [ ] Step 5: Cleanliness & Other
+  [ ] Step 3: Daily Habits (critical for compatibility)
+  [ ] Step 4: Lifestyle & Social Preferences
+  [ ] Step 5: Cleanliness & Other Deal-breakers
 [ ] Add form validation (Zod)
 [ ] Save progress to localStorage
+[ ] Add "Why we ask this" tooltips for each question
+
+# Preference Questions Design Principle:
+# Each question should help answer: "Can I live with this person?"
+
+Step 3 Example: Daily Habits
+┌─────────────────────────────────────┐
+│  Daily Habits                        │
+│  ⚡ These affect daily compatibility │
+│                                     │
+│  Sleep Schedule                      │
+│  ○ Early bird (bed by 10 PM)        │
+│  ○ Night owl (sleep after 12 AM)    │
+│  ● Flexible (no strict schedule)    │
+│                                     │
+│  Work/Study Schedule                 │
+│  ○ Work from home (mostly)          │
+│  ● Office (9-6)                     │
+│  ○ Student (variable schedule)      │
+│                                     │
+│  Weekend Routine                    │
+│  ○ Quiet at home                    │
+│  ● Often out with friends           │
+│  ○ Hosting guests frequently        │
+│                                     │
+│  ℹ️ Different sleep schedules can   │
+│     work if both are respectful!    │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-### 🗓️ Week 5: Matching Algorithm
+### 🗓️ Week 5: Compatibility Algorithm
 
 #### Day 1-3: Matching Service
 ```python
 # backend/app/services/matching.py
 class MatchingService:
+    """
+    Calculates roommate compatibility score.
+    Focus: "Can these two people live together happily?"
+    """
     @staticmethod
     def calculate_compatibility_score(user1, user2) -> int:
         score = 0
         max_score = 100
 
-        # Location (25 points)
+        # Location (25 points) - Critical for logistics
         if user1.city == user2.city:
             score += 15
             if set(user1.areas) & set(user2.areas):
-                score += 10
+                score += 10  # Preferred area overlap
 
-        # Budget (20 points)
-        if budget_overlap(user1, user2):
+        # Budget (20 points) - Must be compatible
+        if budgets_overlap(user1, user2):
             score += 20
 
-        # Habits (30 points)
-        score += habit_score(user1, user2)
+        # Daily Habits (35 points) - Most important for co-living
+        score += habit_compatibility_score(user1, user2)
+        # Includes: sleep schedule, smoking, drinking, food, guests
 
-        # Sleep (10 points)
-        if user1.sleep == user2.sleep:
-            score += 10
-
-        # Cleanliness (15 points)
-        score += cleanliness_score(user1, user2)
+        # Cleanliness (20 points) - Major source of conflict
+        score += cleanliness_match_score(user1, user2)
 
         return (score / max_score) * 100
 
+    @staticmethod
+    def get_compatibility_factors(user1, user2) -> dict:
+        """
+        Returns detailed breakdown of compatibility.
+        Shown to users to help them decide.
+        """
+        return {
+            "location": {"score": 85, "status": "match", "notes": "Same area"},
+            "budget": {"score": 100, "status": "match", "notes": "Budgets align"},
+            "habits": {"score": 70, "status": "compatible", "notes": "Different sleep but respectful"},
+            "cleanliness": {"score": 60, "status": "caution", "notes": "Different cleanliness levels"},
+        }
+
 # Tasks:
 [ ] Create MatchingService class
-[ ] Implement all scoring methods
-[ ] Write unit tests for algorithm
+[ ] Implement calculate_compatibility_score()
+[ ] Implement get_compatibility_factors() (for UI display)
+[ ] Implement habit_compatibility_score()
+[ ] Implement cleanliness_match_score()
+[ ] Write unit tests for edge cases
 [ ] Test with sample data
+[ ] Document scoring logic for transparency
 ```
 
 #### Day 4-7: Match API
@@ -332,44 +442,114 @@ class MatchingService:
 
 ---
 
-### 🗓️ Week 6: Swipe System
+### 🗓️ Week 6: Roommate Discovery System
 
-#### Day 1-4: Swipe Backend
+#### Day 1-4: Discovery Backend
 ```python
-# backend/app/models/swipe.py
-class Swipe(Base):
-    __tablename__ = "swipes"
+# backend/app/models/discovery.py
+class DiscoveryAction(Base):
+    __tablename__ = "discovery_actions"
 
     id = Column(UUID, primary_key=True)
-    swiper_id = Column(UUID, ForeignKey("users.id"))
-    swiped_id = Column(UUID, ForeignKey("users.id"))
-    direction = Column(String)  # 'right', 'left', 'super'
+    actor_id = Column(UUID, ForeignKey("users.id"))       # Who took action
+    target_id = Column(UUID, ForeignKey("users.id"))      # Who was acted upon
+    action_type = Column(String)  # 'connect', 'shortlist', 'pass', 'super_match'
+    created_at = Column(DateTime, default=datetime.utcnow)
+    UNIQUE(actor_id, target_id)
+
+class Match(Base):
+    __tablename__ = "matches"
+
+    id = Column(UUID, primary_key=True)
+    user1_id = Column(UUID, ForeignKey("users.id"))
+    user2_id = Column(UUID, ForeignKey("users.id"))
+    compatibility_score = Column(Integer)  # 0-100
+    match_type = Column(String)  # 'mutual_connect', 'super_match', 'chat_request'
+    status = Column(String, default='pending')  # 'pending', 'accepted', 'declined'
     created_at = Column(DateTime, default=datetime.utcnow)
 
-# backend/app/api/swipes.py
-@router.post("/api/swipes")
-async def create_swipe(swipe: SwipeCreate):
-    # Save swipe
-    # Check if mutual right swipe → create match!
+# backend/app/api/discovery.py
+@router.post("/api/discovery/connect")
+async def connect_user(user_id: UUID):
+    """
+    User connects with another user.
+    - If mutual connect exists → Create match
+    - Else → Save connect action, notify target
+    """
+    pass
+
+@router.post("/api/discovery/shortlist")
+async def shortlist_user(user_id: UUID):
+    """Save user to shortlist for later review"""
+    pass
+
+@router.post("/api/discovery/pass")
+async def pass_user(user_id: UUID):
+    """Pass on user (won't show again)"""
+    pass
+
+@router.post("/api/discovery/super-match")
+async def super_match_user(user_id: UUID):
+    """Strong interest signal (bypasses some filters)"""
+    pass
+
+@router.post("/api/discovery/request-chat")
+async def request_chat(user_id: UUID):
+    """One-time chat request even without mutual connect"""
     pass
 
 # Tasks:
-[ ] Create Swipe model + migration
-[ ] Build POST /api/swipes
-[ ] Implement mutual match detection
-[ ] Create Match model
-[ ] Trigger notification on match
+[ ] Create DiscoveryAction model + migration
+[ ] Create Match model + migration
+[ ] Build connect endpoint (mutual match detection)
+[ ] Build shortlist endpoint
+[ ] Build pass endpoint
+[ ] Build super-match endpoint
+[ ] Build request-chat endpoint
+[ ] Create notification triggers for each action
+[ ] Create GET /api/discovery/my-shortlists
+[ ] Create GET /api/discovery/my-connections
 ```
 
-#### Day 5-7: Swipe Frontend
+#### Day 5-7: Discovery Frontend
 ```bash
 # Tasks:
-[ ] Create swipe card component
-[ ] Add Tinder-like animations
-[ ] Implement swipe gestures
-[ ] Add like/pass/super buttons
-[ ] Connect to API
-[ ] Show "It's a Match!" modal
+[ ] Create discovery card component (roommate profile view)
+[ ] Add action buttons: Connect, Shortlist, Pass, Super Match
+[ ] Implement card stack navigation (previous/next)
+[ ] Add smooth transitions between cards
+[ ] Create shortlist management page
+[ ] Show compatibility score prominently
+[ ] Add key compatibility factors display
+[ ] Create "New Match!" modal (not dating-style, more practical)
+[ ] Create "Connection Request" modal for chat requests
+[ ] Add visual feedback for all actions
+
+# Profile Card Design:
+┌─────────────────────────────────────┐
+│                                     │
+│        ┌──────────────────┐         │
+│        │                  │         │
+│        │  [Profile Photo] │         │
+│        │                  │         │
+│        └──────────────────┘         │
+│                                     │
+│  Rahul, 28 — Software Engineer      │
+│  📍 Koramangala, Bangalore          │
+│                                     │
+│  COMPATIBILITY: 85% ✅             │
+│                                     │
+│  Key Matches:                       │
+│  ✅ Same area: Koramangala          │
+│  ✅ Budget: ₹10k-15k (matches)     │
+│  ✅ Non-smoker, early bird          │
+│  ✅ Cleanliness: Level 4 (matches)  │
+│                                     │
+│  [📝 Shortlist]  [➡️ Pass]          │
+│                                     │
+│    [💚 Connect]    [⭐ Super Match] │
+│                                     │
+└─────────────────────────────────────┘
 ```
 
 ---
@@ -609,10 +789,10 @@ def send_match_notification(email: str, match_name: str):
 | Week 2 | ⬜ Not Started | Database & models |
 | Week 3 | ⬜ Not Started | Authentication |
 | Week 4 | ⬜ Not Started | User profiles |
-| Week 5 | ⬜ Not Started | Matching algorithm |
-| Week 6 | ⬜ Not Started | Swipe system |
+| Week 5 | ⬜ Not Started | Compatibility algorithm |
+| Week 6 | ⬜ Not Started | Discovery system (Connect/Shortlist/Pass) |
 | Week 7 | ⬜ Not Started | Real-time chat |
-| Week 8 | ⬜ Not Started | Search & discovery |
+| Week 8 | ⬜ Not Started | Search & filters |
 | Week 9 | ⬜ Not Started | Safety features |
 | Week 10 | ⬜ Not Started | Notifications |
 | Week 11 | ⬜ Not Started | Testing & polish |

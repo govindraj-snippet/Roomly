@@ -26,13 +26,21 @@ Welcome to the Roomly documentation. This project is a roommate matching platfor
 
 **Roomly** is a roommate matching platform that connects compatible roommates based on lifestyle preferences, habits, budget, and location requirements.
 
+### Core Philosophy: "Can I Live With This Person?"
+
+**Not a dating app** — Roomly focuses on practical roommate compatibility through:
+- **Connect** — "I could live with this person"
+- **Shortlist** — "Save for later consideration"
+- **Pass** — "Not a match for me"
+- **Super Match** — "Highly compatible!"
+
 ### MVP Features
 - ✅ User registration (email + Google OAuth)
 - ✅ User profiles with preferences
-- ✅ Smart matching algorithm (0-100 compatibility score)
-- ✅ Swipe interface (Tinder-like)
-- ✅ Real-time chat
-- ✅ Search & filters
+- ✅ Smart compatibility algorithm (0-100 score)
+- ✅ **Discovery System** (Connect/Shortlist/Pass/Super Match)
+- ✅ Real-time chat between mutual connections
+- ✅ Search with filters
 - ✅ Report & block system
 
 ### Tech Stack
@@ -50,8 +58,8 @@ Welcome to the Roomly documentation. This project is a roommate matching platfor
 | Week 2 | 🔴 Not Started | Database & Models |
 | Week 3 | 🔴 Not Started | Authentication |
 | Week 4 | 🔴 Not Started | User Profiles |
-| Week 5 | 🔴 Not Started | Matching Algorithm |
-| Week 6 | 🔴 Not Started | Swipe System |
+| Week 5 | 🔴 Not Started | Compatibility Algorithm |
+| Week 6 | 🔴 Not Started | Discovery System |
 | Week 7 | 🔴 Not Started | Real-time Chat |
 | Week 8 | 🔴 Not Started | Search & Discovery |
 | Week 9 | 🔴 Not Started | Safety Features |

@@ -159,19 +159,30 @@ CREATE INDEX idx_preferences_city ON preferences(preferred_city);
 CREATE INDEX idx_preferences_user ON preferences(user_id);
 ```
 
-### Swipes Table
+### Discovery Actions Table
 ```sql
-CREATE TABLE swipes (
+-- Replaces "swipes" with roommate-focused discovery actions
+CREATE TABLE discovery_actions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    swiper_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    swiped_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    direction VARCHAR(10) NOT NULL CHECK (direction IN ('right', 'left', 'super')),
+    actor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    target_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('connect', 'shortlist', 'pass', 'super_match')),
     created_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(swiper_id, swiped_id)
+    UNIQUE(actor_id, target_id)
 );
 
-CREATE INDEX idx_swipes_swiper ON swipes(swiper_id);
-```
+CREATE INDEX idx_discovery_actor ON discovery_actions(actor_id);
+CREATE INDEX idx_discovery_action ON discovery_actions(action_type);
+
+-- Shortlists table (saved users for later)
+CREATE TABLE shortlists (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    saved_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, saved_user_id)
+);
 
 ### Matches Table
 ```sql
@@ -180,11 +191,15 @@ CREATE TABLE matches (
     user1_id UUID REFERENCES users(id) ON DELETE CASCADE,
     user2_id UUID REFERENCES users(id) ON DELETE CASCADE,
     compatibility_score INTEGER CHECK (compatibility_score BETWEEN 0 AND 100),
+    match_type VARCHAR(30) DEFAULT 'mutual_connect',
+    -- Options: 'mutual_connect', 'super_match', 'chat_request', 'accepted', 'declined'
     status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(user1_id, user2_id)
 );
-```
+
+CREATE INDEX idx_matches_users ON matches(user1_id, user2_id);
+CREATE INDEX idx_matches_status ON matches(status);
 
 ### Messages Table
 ```sql
@@ -244,7 +259,7 @@ roomly/
 │   │   │       ├── __init__.py
 │   │   │       ├── user.py
 │   │   │       ├── preference.py
-│   │   │       ├── swipe.py
+│   │   │       ├── discovery.py       # Discovery actions (connect, shortlist, pass)
 │   │   │       ├── match.py
 │   │   │       ├── message.py
 │   │   │       ├── report.py
@@ -258,8 +273,8 @@ roomly/
 │   │   │   ├── auth.py
 │   │   │   ├── users.py
 │   │   │   ├── preferences.py
+│   │   │   ├── discovery.py        # Connect, shortlist, pass, super-match
 │   │   │   ├── matches.py
-│   │   │   ├── swipes.py
 │   │   │   └── messages.py
 │   │   ├── services/
 │   │   │   ├── auth_service.py
@@ -282,14 +297,17 @@ roomly/
 │   │   │   │   ├── login/
 │   │   │   │   └── register/
 │   │   │   ├── dashboard/
-│   │   │   ├── swipes/
+│   │   │   ├── discovery/         # Roommate discovery (Connect/Shortlist/Pass)
+│   │   │   ├── shortlists/        # Saved profiles
+│   │   │   ├── matches/           # Mutual connections
 │   │   │   ├── chat/
 │   │   │   ├── search/
 │   │   │   └── profile/
 │   │   ├── components/
-│   │   │   ├── ui/          # shadcn components
+│   │   │   ├── ui/               # shadcn components
 │   │   │   ├── auth/
-│   │   │   ├── swipe/
+│   │   │   ├── discovery/        # Discovery card, action buttons
+│   │   │   ├── shortlist/        # Shortlist management
 │   │   │   └── chat/
 │   │   ├── lib/
 │   │   │   ├── api.ts       # API client
@@ -380,10 +398,15 @@ GET    /api/matches         - Get compatible users
 GET    /api/matches/:id     - Get match details
 ```
 
-### Swipes
+### Discovery (Roommate Finding)
 ```
-POST   /api/swipes          - Record swipe
-GET    /api/swipes/me       - Get my swipes
+POST   /api/discovery/connect         - Connect with user (signals interest)
+POST   /api/discovery/shortlist       - Save user to shortlist
+POST   /api/discovery/pass            - Pass on user (won't show again)
+POST   /api/discovery/super-match     - Strong interest signal
+POST   /api/discovery/request-chat    - One-time chat request
+GET    /api/discovery/my-shortlists   - Get saved users
+GET    /api/discovery/my-connections  - Get pending connections
 ```
 
 ### Chat
