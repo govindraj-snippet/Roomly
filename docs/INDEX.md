@@ -11,6 +11,7 @@ Welcome to the Roomly documentation. This project is a roommate matching platfor
 | [**Quick Start**](QUICKSTART.md) | Get up and running in 30 minutes |
 | [**MVP Roadmap**](MVP_ROADMAP.md) | 12-week implementation plan |
 | [**Tech Stack**](TECH_STACK.md) | Technologies, database schema, API endpoints |
+| [**System Design**](SYSTEM_DESIGN.md) | MVP architecture, flows, data model, and scaling plan |
 
 ---
 
