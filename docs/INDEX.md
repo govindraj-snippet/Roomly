@@ -9,7 +9,8 @@ Welcome to the Roomly documentation. This project is a roommate matching platfor
 | Document | Description |
 |----------|-------------|
 | [**Quick Start**](QUICKSTART.md) | Get up and running in 30 minutes |
-| [**MVP Roadmap**](MVP_ROADMAP.md) | 12-week implementation plan |
+| [**Phase Roadmap**](PHASE_ROADMAP.md) ⭐ | **Phase-wise implementation guide (RECOMMENDED)** |
+| [**MVP Roadmap**](MVP_ROADMAP.md) | Detailed 12-week implementation plan |
 | [**Tech Stack**](TECH_STACK.md) | Technologies, database schema, API endpoints |
 
 ---
@@ -52,20 +53,12 @@ Welcome to the Roomly documentation. This project is a roommate matching platfor
 
 ## 🎯 Current Status
 
-| Week | Status | Completion |
-|------|--------|------------|
-| Week 1 | 🔴 Not Started | Project Setup |
-| Week 2 | 🔴 Not Started | Database & Models |
-| Week 3 | 🔴 Not Started | Authentication |
-| Week 4 | 🔴 Not Started | User Profiles |
-| Week 5 | 🔴 Not Started | Compatibility Algorithm |
-| Week 6 | 🔴 Not Started | Discovery System |
-| Week 7 | 🔴 Not Started | Real-time Chat |
-| Week 8 | 🔴 Not Started | Search & Discovery |
-| Week 9 | 🔴 Not Started | Safety Features |
-| Week 10 | 🔴 Not Started | Notifications |
-| Week 11 | 🔴 Not Started | Testing & Polish |
-| Week 12 | 🔴 Not Started | Launch Prep |
+| Phase | Status | Completion |
+|-------|--------|------------|
+| **Phase 1** | ✅ Completed | Foundation (Weeks 1-3) |
+| Phase 2 | 🔴 Not Started | User Data & Matching (Weeks 4-5) |
+| Phase 3 | 🔴 Not Started | Core Features (Weeks 6-8) |
+| Phase 4 | 🔴 Not Started | Polish & Launch (Weeks 9-12) |
 
 ---
 
